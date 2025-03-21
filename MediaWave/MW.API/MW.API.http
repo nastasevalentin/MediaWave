@@ -1,6 +1,3 @@
-@MW.API_HostAddress = http://localhost:5295
+@MW.API_HostAddress = http://localhost:5067
 
-GET {{MW.API_HostAddress}}/weatherforecast/
-Accept: application/json
 
-###

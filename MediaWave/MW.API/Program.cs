@@ -1,40 +1,22 @@
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(); // Ensure SwaggerGen is added
-
+builder.Services.AddSwaggerGen(); 
+builder.Services.AddControllers();
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-app.UseSwagger(); // Ensure Swagger middleware is added
-app.UseSwaggerUI(); // Ensure Swagger UI middleware is added
-app.UseHttpsRedirection();
+app.UseSwagger();
+app.UseSwaggerUI();
+
+
+app.UseStaticFiles();
+app.UseRouting();
+app.UseAuthorization();
 app.MapControllers();
+app.UseHttpsRedirection();
 
-var summaries = new[]
-{
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
-
-app.MapGet("/weatherforecast", () =>
-    {
-        var forecast = Enumerable.Range(1, 5).Select(index =>
-                new WeatherForecast
-                (
-                    DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-                    Random.Shared.Next(-20, 55),
-                    summaries[Random.Shared.Next(summaries.Length)]
-                ))
-            .ToArray();
-        return forecast;
-    })
-    .WithName("GetWeatherForecast");
+app.MapGet("/", () => Results.Content(
+    "<h1>Welcome to the API1</h1><p>Try <a href='/swagger'>Swagger UI</a></p>", 
+    "text/html"));
 
 app.Run();
-
-record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-}
