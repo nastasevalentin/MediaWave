@@ -18,7 +18,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\MW.API\MW.API.csproj" />
       <ProjectReference Include="..\MW.Application\MW.Application.csproj" />
     </ItemGroup>
 

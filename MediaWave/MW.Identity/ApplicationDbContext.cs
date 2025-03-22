@@ -9,7 +9,7 @@ namespace MW.Identity
     {
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseSqlServer("Server=localhost,1433;Database=mw_identity;User Id=SA;Password=StrongPassword123!;TrustServerCertificate=True;");
+            optionsBuilder.UseSqlServer("Server=localhost,1433;Database=IdentityDB;User Id=sa;Password=YourStrong@Password123;TrustServerCertificate=True;");
         }
         
         // public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)

@@ -15,13 +15,11 @@ public class AuthenticationController : ControllerBase
 {
     private readonly IAuthService _authService;
     private readonly ILogger<AuthenticationController> _logger;
-    private readonly ICurrentUserService currentUserService;
 
-    public AuthenticationController(IAuthService authService, ILogger<AuthenticationController> logger,  ICurrentUserService currentUserService)
+    public AuthenticationController(IAuthService authService, ILogger<AuthenticationController> logger)
     {
         _authService = authService;
         _logger = logger;
-        this.currentUserService = currentUserService;
     }
 
     [HttpPost]

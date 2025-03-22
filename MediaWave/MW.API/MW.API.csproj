@@ -14,10 +14,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\MW.Application\MW.Application.csproj" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <Folder Include="Models\" />
+      <ProjectReference Include="..\MW.Identity\MW.Identity.csproj" />
     </ItemGroup>
 
 </Project>

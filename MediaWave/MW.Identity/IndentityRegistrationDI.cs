@@ -25,7 +25,7 @@ namespace MW.Identity
                options =>
                options.UseSqlServer(
                    configuration.GetConnectionString
-                   ("MuseWaveUserConnection"),
+                   ("IdentityConnection"),
                    builder =>
                    builder.MigrationsAssembly(
                        typeof(ApplicationDbContext)
