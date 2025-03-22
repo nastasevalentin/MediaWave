@@ -12,8 +12,8 @@ namespace MW.Identity
             optionsBuilder.UseSqlServer("Server=localhost,1433;Database=IdentityDB;User Id=sa;Password=YourStrong@Password123;TrustServerCertificate=True;");
         }
         
-        // public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
-        // {
-        // }
+        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
+        {
+        }
     }
 }
