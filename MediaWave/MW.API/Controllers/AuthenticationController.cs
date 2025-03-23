@@ -33,14 +33,25 @@ public class AuthenticationController : ControllerBase
                 return BadRequest("Invalid payload");
             }
 
-            var (status, message) = await _authService.Login(model);
+            var (status, token) = await _authService.Login(model);
 
+            _logger.LogInformation("Token: " + token);
+
+            
             if (status == 0)
             {
-                return BadRequest(message);
+                return BadRequest(token); // token holds error message in this case
             }
 
-            return Ok(message);
+            Response.Cookies.Append("Authorization", $"Bearer {token}", new CookieOptions
+            {
+                HttpOnly = true,        
+                Secure = true,          
+                SameSite = SameSiteMode.Strict,
+                Expires = DateTimeOffset.UtcNow.AddHours(1) 
+            });
+
+            return Ok(token);
         }
         catch (Exception ex)
         {
@@ -48,6 +59,7 @@ public class AuthenticationController : ControllerBase
             return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
         }
     }
+
 
     [HttpPost]
     [Route("register")]
@@ -76,13 +88,13 @@ public class AuthenticationController : ControllerBase
         }
     }
     
-    [HttpPost]
-    [Route("logout")]
-    public async Task<IActionResult> Logout()
+    [HttpGet("logout")]
+    public IActionResult Logout()
     {
-        await _authService.Logout();
-        return Ok();
+        Response.Cookies.Delete("Authorization"); // 👈 removes the JWT cookie
+        return Redirect("/"); // or wherever you want
     }
+
     
     
     

@@ -4,8 +4,10 @@
 @{
     Layout = null;
 }
+<p>User ID: @User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value</p>
 
 <!DOCTYPE html>
+<p>User ID: @User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value</p>
 
 <html>
 <head>

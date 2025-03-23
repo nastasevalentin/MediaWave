@@ -1,3 +1,9 @@
+using System.Text;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using MW.Identity;
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddAuthentication("Cookies")
@@ -5,6 +11,11 @@ builder.Services.AddAuthentication("Cookies")
     {
         options.LoginPath = "/Account/Login";
     });
+
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("IdentityConnection")));
+
+
 // Add services to the container.
 builder.Services.AddRazorPages();
 builder.Services.AddHttpClient("API", client =>
@@ -18,7 +29,42 @@ builder.Services.AddHttpClient("API", client =>
             ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator
         };
     });
+var jwtSettings = builder.Configuration.GetSection("JWT");
+var secretKey = jwtSettings["Secret"];
+var issuer = jwtSettings["ValidIssuer"];
+var audience = jwtSettings["ValidAudience"];
+builder.Services.AddAuthentication(options =>
+    {
+        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    })
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
 
+            ValidIssuer = issuer,
+            ValidAudience = audience,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey!))
+        };
+        options.Events = new JwtBearerEvents
+        {
+            OnMessageReceived = context =>
+            {
+                var tokenFromCookie = context.Request.Cookies["Authorization"];
+                if (!string.IsNullOrEmpty(tokenFromCookie) && tokenFromCookie.StartsWith("Bearer "))
+                {
+                    context.Token = tokenFromCookie.Substring("Bearer ".Length);
+                }
+                return Task.CompletedTask;
+            }
+        };
+
+    });
 
 var app = builder.Build();
 

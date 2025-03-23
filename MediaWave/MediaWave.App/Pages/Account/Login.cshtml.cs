@@ -51,28 +51,31 @@ namespace MediaWave.App.Pages.Account
                 return Page();
 
             var client = _httpClientFactory.CreateClient("API");
+
+            // Call the API to log in
             var response = await client.PostAsJsonAsync("/api/v1/authentication/login", Input);
 
             if (response.IsSuccessStatusCode)
             {
                 var token = await response.Content.ReadAsStringAsync();
 
-                var claims = new List<Claim>
+                // ✅ Store token in a secure cookie so it can be read by JwtBearerEvents
+                HttpContext.Response.Cookies.Append("Authorization", $"Bearer {token}", new CookieOptions
                 {
-                    new Claim(ClaimTypes.Name, Input.Username),
-                };
+                    HttpOnly = true,
+                    Secure = false, // set to true in production (requires HTTPS)
+                    SameSite = SameSiteMode.Strict,
+                    Expires = DateTimeOffset.UtcNow.AddHours(1)
+                });
 
-                var identity = new ClaimsIdentity(claims, "Cookies");
-                var principal = new ClaimsPrincipal(identity);
-
-                await HttpContext.SignInAsync("Cookies", principal);
+                // ✅ Do NOT create a manual ClaimsPrincipal here — the JWT middleware handles that
 
                 return RedirectToPage("/Index");
             }
 
-
             ErrorMessage = "Invalid username or password.";
             return Page();
         }
+
     }
 }

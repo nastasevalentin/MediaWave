@@ -10,7 +10,7 @@ builder.Services.AddControllers();
 builder.Services.AddIdentityToDI(builder.Configuration);
 
 builder.Services.AddSwaggerGen(c =>
-{
+    {
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         Description = @"JWT Authorization header using the Bearer scheme. \r\n\r\n 
