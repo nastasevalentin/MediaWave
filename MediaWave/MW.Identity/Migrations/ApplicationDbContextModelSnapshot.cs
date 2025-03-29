@@ -22,6 +22,22 @@ namespace MW.Identity.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("MW.Domain.Entities.Subscription", b =>
+                {
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("ChannelId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<DateTime>("SubscribedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("UserId", "ChannelId");
+
+                    b.ToTable("Subscriptions");
+                });
+
             modelBuilder.Entity("MW.Identity.Models.ApplicationUser", b =>
                 {
                     b.Property<string>("Id")
@@ -221,6 +237,17 @@ namespace MW.Identity.Migrations
                     b.HasKey("UserId", "LoginProvider", "Name");
 
                     b.ToTable("AspNetUserTokens", (string)null);
+                });
+
+            modelBuilder.Entity("MW.Domain.Entities.Subscription", b =>
+                {
+                    b.HasOne("MW.Identity.Models.ApplicationUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>

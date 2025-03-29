@@ -9,8 +9,12 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using MW.Application.Contracts.Identity;
+using MW.Application.Contracts.Interfaces;
+using MW.Application.Services;
 using MW.Identity.Models;
+using MW.Identity.Repositories;
 using MW.Identity.Services;
+using MW.Infrastructure.Repositories;
 
 namespace MW.Identity
 {
@@ -69,6 +73,8 @@ namespace MW.Identity
                         });
             services.AddScoped
                <IAuthService, AuthService>();
+            services.AddScoped<ISubscriptionRepository, SubscriptionRepository>();
+            services.AddScoped<ISubscriptionService, SubscriptionService>();
             return services;
         }
         
