@@ -1,31 +1,47 @@
+using System.Security.Claims;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using MW.Identity;
 using System.Threading.Tasks;
+using MW.Application.Contracts.Interfaces;
 
 public class ProfileModel : PageModel
 {
-    private readonly ApplicationDbContext _context;
+    private readonly IProfileService _profileService;
+    private readonly IHttpContextAccessor _httpContextAccessor;
 
-    public ProfileModel(ApplicationDbContext context)
+    public string? Username { get; set; }
+    public string? Email { get; set; }
+    public bool IsSubscribed { get; set; }
+    public int SubscriberCount { get; set; }
+
+    public string? ProfileUserId { get; set; }
+    public string? LoggedInUserId => _httpContextAccessor.HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+    public ProfileModel(IProfileService profileService, IHttpContextAccessor httpContextAccessor)
     {
-        _context = context;
+        _profileService = profileService;
+        _httpContextAccessor = httpContextAccessor;
     }
 
-    [BindProperty(SupportsGet = true)]
-    public string Id { get; set; }
-
-    public string Username { get; set; }
-    public string Email { get; set; }
-    public DateTime CreatedAt { get; set; }
-
-    public async Task<IActionResult> OnGetAsync()
+    public async Task<IActionResult> OnGetAsync(string id)
     {
-        var user = await _context.Users.FindAsync(Id);
-        if (user == null) return NotFound();
+        ProfileUserId = id;
 
-        Username = user.UserName;
-        Email = user.Email;
+        var profile = await _profileService.GetUserProfileAsync(id);
+        if (profile == null)
+        {
+            return NotFound();
+        }
+
+        Username = profile.Username;
+        Email = profile.Email;
+        SubscriberCount = await _profileService.GetSubscriberCountAsync(id);
+
+        if (LoggedInUserId != null && LoggedInUserId != id)
+        {
+            IsSubscribed = await _profileService.IsSubscribedAsync(LoggedInUserId, id);
+        }
 
         return Page();
     }

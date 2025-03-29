@@ -17,3 +17,50 @@ else
 {
     <p>User not found.</p>
 }
+
+<p><strong>Subscribers:</strong> <span id="subscriber-count">@Model.SubscriberCount</span></p>
+
+@if (Model.LoggedInUserId != null && Model.LoggedInUserId != Model.ProfileUserId)
+{
+    <button id="subscribe-btn" class="btn btn-primary" onclick="toggleSubscription()">
+        @(Model.IsSubscribed ? "Unsubscribe" : "Subscribe")
+    </button>
+}
+
+
+@section Scripts {
+    <script>
+        async function toggleSubscription() {
+            const apiBaseUrl = "https://localhost:5067/api/Subscribe/";
+            const isSubscribed = document.getElementById('subscribe-btn').innerText === "Unsubscribe";
+            const endpoint = isSubscribed ? apiBaseUrl + "unsubscribe" : apiBaseUrl + "subscribe";
+
+            const response = await fetch(endpoint, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    userId: '@Model.LoggedInUserId',
+                    channelId: '@Model.ProfileUserId'
+                })
+            });
+
+            if (response.ok) {
+                const button = document.getElementById('subscribe-btn');
+                const countElem = document.getElementById('subscriber-count');
+                let currentCount = parseInt(countElem.innerText);
+
+                if (isSubscribed) {
+                    button.innerText = "Subscribe";
+                    countElem.innerText = currentCount - 1;
+                } else {
+                    button.innerText = "Unsubscribe";
+                    countElem.innerText = currentCount + 1;
+                }
+            } else {
+                alert("Action failed. Please try again.");
+            }
+        }
+    </script>
+}

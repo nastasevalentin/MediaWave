@@ -7,6 +7,15 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(); 
 builder.Services.AddControllers();
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowUI", policy =>
+    {
+        policy.WithOrigins("https://localhost:7056")
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    });
+});
 builder.Services.AddIdentityToDI(builder.Configuration);
 
 builder.Services.AddSwaggerGen(c =>
@@ -59,6 +68,7 @@ app.UseCors("Open");
 
 app.UseStaticFiles();
 app.UseRouting();
+app.UseCors("AllowUI"); 
 app.UseAuthorization();
 app.MapControllers();
 app.UseHttpsRedirection();

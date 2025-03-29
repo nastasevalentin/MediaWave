@@ -2,9 +2,11 @@ using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using MW.Application.Contracts.Interfaces;
 using MW.Identity;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddIdentityToDI(builder.Configuration);
 
 builder.Services.AddAuthentication("Cookies")
     .AddCookie("Cookies", options =>
@@ -14,7 +16,7 @@ builder.Services.AddAuthentication("Cookies")
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("IdentityConnection")));
-
+// builder.Services.AddScoped<IProfileService,ProfileService>();  
 
 // Add services to the container.
 builder.Services.AddRazorPages();

@@ -1,30 +1,63 @@
-
+using Microsoft.EntityFrameworkCore;
 using MW.Application.Contracts.Interfaces;
-using MW.Identity.Repositories;
+using MW.Domain.Entities;
+using MW.Identity;
 
-namespace MW.Application.Services
+public class SubscriptionService : ISubscriptionService
 {
-    public class SubscriptionService : ISubscriptionService
+    private readonly ApplicationDbContext _dbContext;
+
+    public SubscriptionService(ApplicationDbContext dbContext)
     {
-        private readonly ISubscriptionRepository _subscriptionRepository;
+        _dbContext = dbContext;
+    }
 
-        public SubscriptionService(ISubscriptionRepository subscriptionRepository)
-        {
-            _subscriptionRepository = subscriptionRepository;
-        }
+    public async Task<bool> SubscribeAsync(string userId, string channelId)
+    {
+        if (userId == channelId)
+            return false;
 
-        public async Task<bool> SubscribeAsync(string userId, string channelId)
-        {
-            // Add logic to subscribe the user to the channel
-            var result = await _subscriptionRepository.AddSubscriptionAsync(userId, channelId);
-            return result;
-        }
+        var alreadySubscribed = await _dbContext.Subscriptions
+            .AnyAsync(s => s.UserId == userId && s.ChannelId == channelId);
 
-        public async Task<bool> UnsubscribeAsync(string userId, string channelId)
+        if (alreadySubscribed)
+            return false;
+
+        var subscription = new Subscription
         {
-            // Add logic to unsubscribe the user from the channel
-            var result = await _subscriptionRepository.RemoveSubscriptionAsync(userId, channelId);
-            return result;
-        }
+            UserId = userId,
+            ChannelId = channelId,
+            SubscribedAt = DateTime.UtcNow
+        };
+
+        _dbContext.Subscriptions.Add(subscription);
+        await _dbContext.SaveChangesAsync();
+        return true;
+    }
+
+    public async Task<bool> UnsubscribeAsync(string userId, string channelId)
+    {
+        var subscription = await _dbContext.Subscriptions
+            .FirstOrDefaultAsync(s => s.UserId == userId && s.ChannelId == channelId);
+
+        if (subscription == null)
+            return false;
+
+        _dbContext.Subscriptions.Remove(subscription);
+        await _dbContext.SaveChangesAsync();
+        return true;
+    }
+
+    public async Task<bool> IsSubscribedAsync(string userId, string channelId)
+    {
+        return await _dbContext.Subscriptions
+            .AnyAsync(s => s.UserId == userId && s.ChannelId == channelId);
+    }
+
+    // ✅ Add this:
+    public async Task<int> GetSubscriberCountAsync(string channelId)
+    {
+        return await _dbContext.Subscriptions
+            .CountAsync(s => s.ChannelId == channelId);
     }
 }
